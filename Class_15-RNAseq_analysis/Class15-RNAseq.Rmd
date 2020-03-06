@@ -1,0 +1,42 @@
+---
+title: "Class_15_RNAseq"
+output: github_document
+author: "Michael Overton"
+---
+
+
+```{r cars}
+mxl <- read.csv("MXL_genotypes.csv")
+View(mxl)
+
+table(mxl$Genotype..forward.strand.)
+
+```
+
+
+
+```{r pressure, echo=FALSE}
+geno_SNP1 <- read.table("mxl_geno_expression.txt", sep=" ")
+View(geno_SNP1)
+
+AA <- geno_SNP1[geno_SNP1$geno == "A/A",]
+AG <- geno_SNP1[geno_SNP1$geno == "A/G",]
+GG <- geno_SNP1[geno_SNP1$geno == "G/G",]
+
+mean(AA$exp)
+mean(AG$exp)
+mean(GG$exp)
+
+library(ggplot2)
+
+ggplot(geno_SNP1, aes(x=geno, y=exp, fill=geno)) +
+  geom_boxplot(notch=T) + scale_fill_brewer(palette="Blues") + theme_classic()
+
+ggplot(geno_SNP1, aes(x=geno, y=exp)) +
+  geom_jitter(position = position_jitter(width=0.3, height=0.5), size=0.7)
+
+ggplot(geno_SNP1, aes(x=geno, y=exp, color=geno)) +
+  geom_violin() + theme_classic()
+
+```
+

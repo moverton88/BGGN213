@@ -1,0 +1,192 @@
+---
+title: "Lecture_9-Unsup_Learn"
+author: Michael Overton
+date: 02.05.2020
+output: github_document
+---
+
+## K-means clustering
+
+We will try to cluster data using the kmeans() function
+
+```{r}
+tmp_data <- c(rnorm(30,-3), rnorm(30,0,0.4), rnorm(30,3))
+x <- cbind(x=tmp_data, y=rev(tmp_data))
+plot(x)
+
+km <- kmeans(x, 2, 20)
+km_3 <- kmeans(x, 3, 50)
+
+```
+
+Use the kmeans() function setting k to 2 and nstart=20
+Inspect/print the results
+Q. What is in the output object?
+```{r}
+attributes(km)
+```
+
+Q. How many points are in each cluster? 30 and 30
+Q. What ‘component’ of your result object details
+      - cluster size?
+```{r}
+km$size
+```
+      - cluster assignment/membership?
+```{r}
+km$cluster
+```
+      - cluster center?    
+```{r}
+km$centers
+```
+      
+Plot x colored by the kmeans cluster assignment and
+      add cluster centers as blue points
+```{r}
+km_df <- data.frame(x=x[ ,1], y=x[ ,2], k=km$cluster)
+
+plot(x=km_df$x, y=km_df$y, col=km_df$k)
+```
+
+```{r echo=F}
+km_3_df <- data.frame(x=x[ ,1], y=x[ ,2], k=km_3$cluster)
+
+plot(x=km_3_df$x, y=km_3_df$y, col=km_3_df$k)
+points(km_3$centers, pch=15, col="blue", cex=1.5)
+```
+
+      
+## Hierarchical clustering with distance matrix, hclust, and dendrogram
+
+```{r, echo=F}
+dist_x <- dist(x)
+h_x <- hclust(d=dist_x)
+plot(h_x)
+table( cutree(h_x, k=3) )
+km_3$size
+```
+
+```{r, echo=F}
+# Step 1. Generate some example data for clustering 
+x2 <- rbind(matrix(rnorm(100, mean=0, sd=0.3), ncol = 2), # c1 
+           matrix(rnorm(100, mean=1, sd=0.3), ncol = 2), # c2
+           matrix(c(rnorm(50, mean=1, sd=0.3), rnorm(50, mean=0, sd=0.3)), ncol = 2)) # c3
+colnames(x2) <- c("x", "y")
+# Step 2. Plot the data without clustering
+plot(x2)
+# Step 3. Generate colors for known clusters (just so we can compare to hclust results) 
+col <- as.factor( rep(c("c1","c2","c3"), each=50) )
+plot(x2, col=col)
+```
+
+Q. Use the dist(), hclust(), plot() and cutree() functions to return 2 and 3 clusters
+
+```{r, echo=F}
+h_x2 <- hclust( d=dist(x2) )
+plot(h_x2)
+cutree(h_x2, k=2)
+cutree(h_x2, k=3)
+
+```
+
+
+Q. How does this compare to your known 'col' groups?
+
+```{r, echo=F}
+plot(x2, col=cutree(h_x2, k=2))
+plot(x2, col=cutree(h_x2, k=3))
+plot(x2, col=col)
+
+table(cutree(h_x2, k=3))
+x2_trueK <- cbind(x2, col)
+table(x2_trueK[ ,3])
+```
+
+
+## PCA analysis
+
+```{r, echo=F}
+x <- read.csv("UK_foods.csv")
+```
+
+Q1. How many rows and columns are in your new data frame named x? What R functions could you use to answer this questions?
+
+```{r, echo=F}
+dim(x)
+structure(x)
+summary(x)
+View(x)
+head(x, 6)
+
+rownames(x) <- x[,1]
+x <- x[,-1]
+head(x, 6)
+dim(x)
+# or
+
+x <- read.csv("UK_foods.csv", row.names = 1)
+dim(x)
+
+```
+
+Q2. Which approach to solving the ‘row-names problem’ mentioned above do you prefer and why? Is one approach more robust than another under certain circumstances?
+  Ascribing row names inside the read.csv function is shorter and more robust, since the x[ ,-1] argument could be used multiple times and delete useful data from x.
+
+```{r, echo=F}
+barplot(as.matrix(x), beside=T, col=rainbow(nrow(x)))
+```
+
+Q3: Changing what optional argument in the above barplot() function results in the following plot?
+  change "beside=" argument to FALSE
+
+```{r, echo=F}
+barplot(as.matrix(x), beside=F, col=rainbow(nrow(x)))
+```
+
+
+Q5: Generating all pairwise plots may help somewhat. Can you make sense of the following code and resulting figure? What does it mean if a given point lies on the diagonal for a given plot?
+
+This function produces scatterplots of the values of each food for each pair of countries. If a value lies on the diagonal, it means that the value is equal for both countries.
+
+```{r, echo=F}
+pairs(x, col=rainbow(10), pch=16)
+```
+
+
+Q6. What is the main differences between N. Ireland and the other countries of the UK in terms of this data-set?
+  Pairwise comparisons of England, Wales, and Scotland give datapoints that lie very close to the diagonal. The comparisons with N. Ireland show a few datapoints that differ significantly, with higher consumption of fresh potatos and lower consumption of fresh fruit. However, a holistic comparison is difficult.
+
+
+```{r, echo=F}
+pca <- prcomp( t(x) )
+summary(pca)
+```
+
+Q7. Complete the code below to generate a plot of PC1 vs PC2. The second line adds text labels over the data points.
+
+
+```{r, echo=F}
+plot(pca$x[ ,1], pca$x[ ,2], xlab="PC1", ylab="PC2", xlim=c(-300,500), pch=15)
+text(pca$x[,1], pca$x[,2], colnames(x), adj=c(1,0))
+
+```
+
+
+Q8. Customize your plot so that the colors of the country names match the colors in our UK and Ireland map and table at start of this document.
+
+```{r, echo=F}
+plot(pca$x[ ,1], pca$x[ ,2], xlab="PC1", ylab="PC2", xlim=c(-300,500), pch=20, col="gray20")
+text(pca$x[,1], pca$x[,2], colnames(x), adj=c(1,0), col=c("orange", "coral", "cyan", "green"))
+
+```
+
+```{r, echo=F}
+plot(pca$x[ ,1], pca$x[ ,2], xlab="PC1", ylab="PC2", xlim=c(-300,500), pch=20, col="gray20")
+text(pca$x[,1], pca$x[,2], colnames(x), adj=c(1,0), col=c("orange", "coral", "cyan", "green"))
+
+```
+
+
+
+

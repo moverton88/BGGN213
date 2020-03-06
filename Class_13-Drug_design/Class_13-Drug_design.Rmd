@@ -1,0 +1,79 @@
+---
+title: "Class_13-Structure_II"
+author: "Michael Overton"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We will download and clean up the HIV-Pr structure (1HSG) from PDB. We will make separate lists for "protein-only" and "ligand-only" sets.
+
+```{r, echo=FALSE}
+library(bio3d)
+
+p.file <- get.pdb("1hsg")
+hiv <- read.pdb(p.file)
+hiv
+
+```
+> Q1)  What is the name of the two non protein resid values in this structure? What does resid correspond to and how would you get a listing of all reside values in this structure?
+  > HOH and MK1 
+  > resid is short for residue, which corresponds to the identity to each amino acid in the molecule
+  > 
+
+```{r, echo=FALSE}
+prot <- atom.select(hiv, "protein", value=T)
+lig <- atom.select(hiv, "ligand", value=T)
+write.pdb(prot, file="1hsg_protein.pdb")
+write.pdb(lig, file="1hsg_ligand.pdb")
+mk1 <- read.pdb("1hsg_ligand.pdb")
+mk1
+```
+
+Having processed the protein and ligand structures and run them through Autodocker Vina, we will save the output as a .pbd file
+```{r, echo=FALSE}
+res <- read.pdb("all.pdbqt", multi=TRUE) 
+write.pdb(res, "results.pdb")
+
+```
+
+
+```{r, echo=FALSE}
+res <- read.pdb("all.pdbqt", multi=TRUE)
+ori <- read.pdb("1hsg_ligand.pdbqt")
+MK1_dist <- rmsd(ori, res)
+
+heavy_res <- atom.select(res, string="noh", value=T)
+heavy_ori <- atom.select(ori, string="noh", value=T)
+
+res_matrix <- as.matrix(heavy_res[["xyz"]])
+ori_matrix <- as.matrix(heavy_ori[["xyz"]])
+
+MK1_heavy_dist <- c()
+for (i in 1:nrow(res_matrix)) {
+  d <- rmsd(res_matrix[,i], ori_matrix)
+  MK1_heavy_dist <- c(MK1_heavy_dist, d)
+}
+MK1_heavy_dist <- unlist(MK1_dist)
+MK1_heavy_dist
+```
+
+
+```{r, echo=FALSE}
+
+pdb <- read.pdb("1HEL")
+modes <- nma(pdb)
+plot(modes, sse=pdb)
+
+m7 <- mktrj(modes, mode=7, file="nma_7.pdb")
+```
+
+
+```{r, echo=FALSE}
+library("bio3d.view")
+view(m7, col=vec2color(rmsf(m7)))
+
+```
+
