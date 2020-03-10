@@ -1,5 +1,5 @@
 ---
-title: "Lecture_9-Unsup_Learn"
+title: "Lecture_9-Unsupervised_Learning"
 author: Michael Overton
 output: github_document
 ---
