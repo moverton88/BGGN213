@@ -51,7 +51,7 @@ Bfactor_plot <- function(codes, chain="A", elety="CA") {
 }
 
 
-
+Bfactor_plot(codes=PDB_codes)
 
 
 
