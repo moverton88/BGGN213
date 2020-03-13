@@ -2,21 +2,16 @@
 title: "Class12 - Structural Bioinformatics"
 author: "Michael Overton"
 output: github_document
+always_allow_html: TRUE
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## GitHub Documents
+Look at some statistics from the PDB database
 
-This is an R Markdown format used for publishing markdown documents to GitHub. When you click the **Knit** button all R code chunks are run and a markdown file (.md) suitable for publishing to GitHub is generated.
-
-## Including Code
-
-You can include R code in the document as follows:
-
-```{r echo=F}
+```{r}
 PDB_stats <- read.csv("PDB_summary.csv")
 PDB_stats
 
@@ -25,81 +20,69 @@ f_EM <- PDB_stats[3,"Proteins"]/sum(PDB_stats$Proteins)
 f_Prot <- sum(PDB_stats$Proteins)/sum(PDB_stats$Total)
 ```
 
-> Q: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy?
+Q: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy?
   > X-ray=89.9%
   > EM=2.1%
 
-> Q: What proportion of structures in the PDB are protein?
+Q: What proportion of structures in the PDB are protein?
   > 92.7%
 
-> Q: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+Q: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
   > 141
   
-  
-```{r echo=F}
+Load in the protein sequence of a bacterial adenylate kinase and blast for homologs
+```{r}
 library(bio3d)
-pdb <- read.pdb("1hsg")
-
-pdb
-attributes(pdb)
-head(pdb$atom)
-
-
 library(devtools)
 library(BiocManager)
 
-BiocManager::install("msa")
-devtools::install_bitbucket("Grantlab/bio3d-view")
+pdb <- read.pdb("1hsg")
+pdb
 
-# Fetch amino acid sequence of ref Adenylate Kinase
 aa <- get.seq("1ake_A")
-# Blast sequence
+
+```
+
+Plot blast hits and find breakpoint
+```{r}
 b <- blast.pdb(aa)
-# Plot hits and show breakpoint (N=16)
 hits <- plot(b)
-head(hits$pdb.id)
 
 ```
 
   
-  
-```{r echo=FALSE}
-# Fetch files for each of the 16 HiQ matches
-files <- get.pdb(hits$pdb.id, path="pdbs", split=TRUE, gzip=TRUE)
-# Align releated PDBs
-pdbs <- pdbaln(files, fit = TRUE, exefile="msa")
+Load in files of 16 adenylate kinases most closly related to reference and align
+```{r}
+match_files <- get.pdb(hits$pdb.id, path="pdbs", split=T, gzip=T, verbose=F, overwrite=T)
 
-# Vector containing PDB codes for figure axis
-ids <- basename.pdb(pdbs$id)
-
-# Draw schematic alignment
-plot(pdbs, labels=ids)
-
+match_pdbs <- pdbaln(match_files, fit = T, exefile="msa")
 
 ```
-  
 
+Plot alignment and phylogenetic tree
+```{r}
+ids <- basename.pdb(match_pdbs$id)
+plot(match_pdbs, labels=ids)
 
+```
+
+PCA plot of xray structures
 ```{r}
 library(bio3d.view)
 library(rgl)
 
-view(pdbs)
-```
-
-
-```{r}
 anno <- pdb.annotate(ids)
 unique(anno$source)
 
-pc.xray <- pca(pdbs)
+pc.xray <- pca(match_pdbs)
 plot(pc.xray)
+
 ```
 
-
+PCA plot of structures using root mean squared distance
 ```{r}
 # Calculate RMSD
-rd <- rmsd(pdbs)
+rd <- rmsd(match_pdbs)
 
 # Structure-based clustering
 hc.rd <- hclust(dist(rd))
@@ -109,7 +92,7 @@ plot(pc.xray, 1:2, col="grey50", bg=grps.rd, pch=21, cex=1)
 ```
 
 
-
+A better plot using the ggplot package
 ```{r}
 #Plotting results with ggplot2
 library(ggplot2)
@@ -130,31 +113,31 @@ p
 ```
 
 
-
 ```{r}
-# NMA of all structures
-modes <- nma(pdbs)
+# Visualize first principal component
+pc1 <- mktrj(pc.xray, pc=1, file="pc_1.pdb")
 
-plot(modes, pdbs, col=grps.rd)
+video_files <- list.files("Adenylate_kinase_pc1.mpg",
+                         pattern = "\\.mpg$",
+                         recursive = TRUE,
+                         all.files = FALSE,
+                         full.names = TRUE)
+
+```
+
+![](Adenylate_kinase_pc1.mpg)
+
+
+
+Normal mode analysis of protein strucure to show regions of greatest positional change 
+```{r}
+modes <- nma(match_pdbs)
+plot(modes, match_pdbs, col=grps.rd)
+
 ```
 
 
-> Q. What do you note about this plot? Are the black and colored lines similar or different? Where do you think they differ most and why?
+Q. What do you note about this plot? Are the black and colored lines similar or different? Where do you think they differ most and why?
   > The three line colors correspond to the three clusters from the PCA plot, specifically where the individual samples are located on PC1. The black lines are similar to each other and the colored lines are similar to each other. The black and colored lines differ most where there are larger structural differences.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

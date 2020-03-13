@@ -4,6 +4,11 @@ Michael Overton
 
 Look at some statistics from the PDB database
 
+``` r
+PDB_stats <- read.csv("PDB_summary.csv")
+PDB_stats
+```
+
     ##   Experimental.Method Proteins Nucleic.Acids Protein.NA.Complex Other  Total
     ## 1               X-Ray   133756          2086               6884     8 142734
     ## 2                 NMR    11308          1317                265     8  12898
@@ -11,15 +16,52 @@ Look at some statistics from the PDB database
     ## 4               Other      284             4                  6    13    307
     ## 5        Multi Method      146             5                  2     1    154
 
-> Q: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy? X-ray=89.9% EM=2.1%
+``` r
+f_Xray <- PDB_stats[1,"Proteins"]/sum(PDB_stats$Proteins)
+f_EM <- PDB_stats[3,"Proteins"]/sum(PDB_stats$Proteins)
+f_Prot <- sum(PDB_stats$Proteins)/sum(PDB_stats$Total)
+```
 
-> Q: What proportion of structures in the PDB are protein? 92.7%
+Q: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy? &gt; X-ray=89.9% &gt; EM=2.1%
 
-> Q: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB? 141
+Q: What proportion of structures in the PDB are protein? &gt; 92.7%
+
+Q: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB? &gt; 141
 
 Load in the protein sequence of a bacterial adenylate kinase and blast for homologs
 
+``` r
+library(bio3d)
+library(devtools)
+```
+
+    ## Loading required package: usethis
+
+``` r
+library(BiocManager)
+```
+
+    ## Bioconductor version 3.9 (BiocManager 1.30.10), ?BiocManager::install for help
+
+    ## Bioconductor version '3.9' is out-of-date; the current release version '3.10'
+    ##   is available with R version '3.6'; see https://bioconductor.org/install
+
+    ## 
+    ## Attaching package: 'BiocManager'
+
+    ## The following object is masked from 'package:devtools':
+    ## 
+    ##     install
+
+``` r
+pdb <- read.pdb("1hsg")
+```
+
     ##   Note: Accessing on-line PDB file
+
+``` r
+pdb
+```
 
     ## 
     ##  Call:  read.pdb(file = "1hsg")
@@ -42,50 +84,27 @@ Load in the protein sequence of a bacterial adenylate kinase and blast for homol
     ## + attr: atom, xyz, seqres, helix, sheet,
     ##         calpha, remark, call
 
-    ## $names
-    ## [1] "atom"   "xyz"    "seqres" "helix"  "sheet"  "calpha" "remark" "call"  
-    ## 
-    ## $class
-    ## [1] "pdb" "sse"
-
-    ##   type eleno elety  alt resid chain resno insert      x      y     z o     b
-    ## 1 ATOM     1     N <NA>   PRO     A     1   <NA> 29.361 39.686 5.862 1 38.10
-    ## 2 ATOM     2    CA <NA>   PRO     A     1   <NA> 30.307 38.663 5.319 1 40.62
-    ## 3 ATOM     3     C <NA>   PRO     A     1   <NA> 29.760 38.071 4.022 1 42.64
-    ## 4 ATOM     4     O <NA>   PRO     A     1   <NA> 28.600 38.302 3.676 1 43.40
-    ## 5 ATOM     5    CB <NA>   PRO     A     1   <NA> 30.508 37.541 6.342 1 37.87
-    ## 6 ATOM     6    CG <NA>   PRO     A     1   <NA> 29.296 37.591 7.162 1 38.40
-    ##   segid elesy charge
-    ## 1  <NA>     N   <NA>
-    ## 2  <NA>     C   <NA>
-    ## 3  <NA>     C   <NA>
-    ## 4  <NA>     O   <NA>
-    ## 5  <NA>     C   <NA>
-    ## 6  <NA>     C   <NA>
-
-    ## Loading required package: usethis
-
-    ## Bioconductor version 3.9 (BiocManager 1.30.10), ?BiocManager::install for help
-
-    ## Bioconductor version '3.9' is out-of-date; the current release version '3.10'
-    ##   is available with R version '3.6'; see https://bioconductor.org/install
-
-    ## 
-    ## Attaching package: 'BiocManager'
-
-    ## The following object is masked from 'package:devtools':
-    ## 
-    ##     install
+``` r
+aa <- get.seq("1ake_A")
+```
 
     ## Warning in get.seq("1ake_A"): Removing existing file: seqs.fasta
 
     ## Fetching... Please wait. Done.
 
-    ##  Searching ... please wait (updates every 5 seconds) RID = 65KVX6BZ01R 
-    ##  ..
+Plot blast hits and find breakpoint
+
+``` r
+b <- blast.pdb(aa)
+```
+
+    ##  Searching ... please wait (updates every 5 seconds) RID = 6RPVU1DR014 
+    ##  ...........................................................................................................................................................................................................................................................
     ##  Reporting 99 hits
 
-Plot blast hits and find breakpoint
+``` r
+hits <- plot(b)
+```
 
     ##   * Possible cutoff values:    197 -3 
     ##             Yielding Nhits:    16 99 
@@ -96,6 +115,10 @@ Plot blast hits and find breakpoint
 ![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 Load in files of 16 adenylate kinases most closly related to reference and align
+
+``` r
+match_files <- get.pdb(hits$pdb.id, path="pdbs", split=T, gzip=T, verbose=F, overwrite=T)
+```
 
     ## 
       |                                                                            
@@ -132,6 +155,10 @@ Load in files of 16 adenylate kinases most closly related to reference and align
       |==================================================================    |  94%
       |                                                                            
       |======================================================================| 100%
+
+``` r
+match_pdbs <- pdbaln(match_files, fit = T, exefile="msa")
+```
 
     ## Reading PDB files:
     ## pdbs/split_chain/1AKE_A.pdb
@@ -185,28 +212,102 @@ Load in files of 16 adenylate kinases most closly related to reference and align
     ## pdb/seq: 15   name: pdbs/split_chain/3GMT_A.pdb 
     ## pdb/seq: 16   name: pdbs/split_chain/4PZL_A.pdb
 
-Plot alignment and phylogeny ![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
+Plot alignment and phylogenetic tree
+
+``` r
+ids <- basename.pdb(match_pdbs$id)
+plot(match_pdbs, labels=ids)
+```
+
+![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-5-1.png)
 
 PCA plot of xray structures
 
+``` r
+library(bio3d.view)
+library(rgl)
+
+anno <- pdb.annotate(ids)
+```
+
     ## Warning in pdb.annotate(ids): ids should be standard 4 character PDB-IDs: trying
     ## first 4 characters...
+
+``` r
+unique(anno$source)
+```
 
     ## [1] "Escherichia coli"          "Photobacterium profundum" 
     ## [3] "Vibrio cholerae"           "Burkholderia pseudomallei"
     ## [5] "Francisella tularensis"
 
+``` r
+pc.xray <- pca(match_pdbs)
+plot(pc.xray)
+```
+
 ![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-6-1.png)
 
 PCA plot of structures using root mean squared distance
 
-    ## Warning in rmsd(pdbs): No indices provided, using the 204 non NA positions
+``` r
+# Calculate RMSD
+rd <- rmsd(match_pdbs)
+```
+
+    ## Warning in rmsd(match_pdbs): No indices provided, using the 204 non NA positions
+
+``` r
+# Structure-based clustering
+hc.rd <- hclust(dist(rd))
+grps.rd <- cutree(hc.rd, k=3)
+
+plot(pc.xray, 1:2, col="grey50", bg=grps.rd, pch=21, cex=1)
+```
 
 ![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
-A better plot using the ggplot package ![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
+A better plot using the ggplot package
 
+``` r
+#Plotting results with ggplot2
+library(ggplot2)
+library(ggrepel)
+
+df <- data.frame(x=pc.xray$z[,1], y=pc.xray$z[,2])
+col <- as.factor(grps.rd)
+
+an <- anno$source
+
+p <- ggplot(df, aes(x, y)) +
+ geom_point(aes(col=col), size=2) +
+ xlab("PC1") +
+ ylab("PC2") +
+ scale_color_discrete(name="Clusters") +
+ geom_text_repel(aes(label=paste(an,"\n",ids)))
+p
+```
+
+![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-8-1.png)
+
+``` r
+# Visualize first principal component
+pc1 <- mktrj(pc.xray, pc=1, file="pc_1.pdb")
+
+video_files <- list.files("Adenylate_kinase_pc1.mpg",
+                         pattern = "\\.mpg$",
+                         recursive = TRUE,
+                         all.files = FALSE,
+                         full.names = TRUE)
+```
+
+<iframe width="720" height="480" src="Adenylate_kinase_pc1.mpg" align="middle" frameborder="0" allowfullscreen>
+</iframe>
 Normal mode analysis of protein strucure to show regions of greatest positional change
+
+``` r
+modes <- nma(match_pdbs)
+```
 
     ## 
     ## Details of Scheduled Calculation:
@@ -253,8 +354,12 @@ Normal mode analysis of protein strucure to show regions of greatest positional 
       |                                                                            
       |======================================================================| 100%
 
+``` r
+plot(modes, match_pdbs, col=grps.rd)
+```
+
     ## Extracting SSE from pdbs$sse attribute
 
-![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-9-1.png)
+![](Class_12-Structural_analysis_files/figure-markdown_github/unnamed-chunk-10-1.png)
 
-> Q. What do you note about this plot? Are the black and colored lines similar or different? Where do you think they differ most and why? The three line colors correspond to the three clusters from the PCA plot, specifically where the individual samples are located on PC1. The black lines are similar to each other and the colored lines are similar to each other. The black and colored lines differ most where there are larger structural differences.
+Q. What do you note about this plot? Are the black and colored lines similar or different? Where do you think they differ most and why? &gt; The three line colors correspond to the three clusters from the PCA plot, specifically where the individual samples are located on PC1. The black lines are similar to each other and the colored lines are similar to each other. The black and colored lines differ most where there are larger structural differences.
