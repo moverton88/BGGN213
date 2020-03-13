@@ -12,16 +12,17 @@ The data for for hands-on session comes from GEO entry: GSE37704, which is assoc
 Trapnell C, Hendrickson DG, Sauvageau M, Goff L et al. "Differential analysis of gene regulation at transcript resolution with RNA-seq". Nat Biotechnol 2013 Jan;31(1):46-53. PMID: 23222703
 The authors report on differential analysis of lung fibroblasts in response to loss of the developmental transcription factor HOXA1. Their results and others indicate that HOXA1 is required for lung fibroblast and HeLa cell cycle progression. In particular their analysis show that "loss of HOXA1 results in significant expression level changes in thousands of individual transcripts, along with isoform switching events in key regulators of the cell cycle". For our session we have used their Sailfish gene-level estimated counts and hence are restricted to protein-coding genes only.
 
-```{r, echo = FALSE}
+```{r, include=F}
 library(DESeq2)
 
+```
+
+
+```{r}
 count_data <- read.csv("GSE37704_featurecounts.csv", row.names=1)
 colData <- read.csv("GSE37704_metadata.csv")
 
 count_data <- count_data[,-1]
-
-View(count_data)
-View(colData)
 
 dim(count_data)
 
@@ -32,7 +33,7 @@ dim(count_data_fltr)
 ```
 
 
-```{r, echo=FALSE}
+```{r}
 dds = DESeqDataSetFromMatrix(countData=count_data_fltr,
                              colData=colData,
                              design=~condition)
@@ -41,6 +42,8 @@ dds = DESeq(dds)
 res <- results(dds)
 summary(res)
 ```
+
+
 ```{r}
 plot( res$log2FoldChange, -log(res$padj) )
 # Make a color vector for all genes
