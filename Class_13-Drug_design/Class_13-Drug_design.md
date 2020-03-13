@@ -125,8 +125,8 @@ pdb <- read.pdb("1HEL")
 modes <- nma(pdb)
 ```
 
-    ##  Building Hessian...     Done in 0.014 seconds.
-    ##  Diagonalizing Hessian...    Done in 0.103 seconds.
+    ##  Building Hessian...     Done in 0.016 seconds.
+    ##  Diagonalizing Hessian...    Done in 0.108 seconds.
 
 ``` r
 plot(modes, sse=pdb)
@@ -144,3 +144,5 @@ view(m7, col=vec2color(rmsf(m7)))
 ```
 
     ## Potential all C-alpha atom structure(s) detected: Using calpha.connectivity()
+
+![](1hsg_move.png)
