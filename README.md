@@ -8,7 +8,7 @@ This is my classwork for the Graduate Bioinformatics at UCSD.
 - Class 10: [Unsupervised Learning Project](https://github.com/moverton88/BGGN213/blob/master/Class_10-Unsup_learning/Lecture_10-Unsup_learnining.md)
 - Class 12: [Structural Analysis](https://github.com/moverton88/BGGN213/blob/master/Class_12-Structural_analysis/Class_12-Structural_analysis.md)
 - Class 13: [Drug Design](https://github.com/moverton88/BGGN213/blob/master/Class_13-Drug_design/Class_13-Drug_design.md)
-- Class 14: [Gene Expression](https://github.com/moverton88/BGGN213/tree/master/Class_14-Diff_expression)
+- Class 14: [Gene Expression]()
 - Class 15: [RNAseq](https://github.com/moverton88/BGGN213/blob/master/Class_15-RNAseq_analysis/Class15-RNAseq.md)
 - Class 16: [Gene Ontology]()
 - Class 17: [Network Analysis]()
