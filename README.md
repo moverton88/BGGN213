@@ -10,7 +10,7 @@ This is my classwork for the Graduate Bioinformatics at UCSD.
 - Class 13: [Drug Design](https://github.com/moverton88/BGGN213/blob/master/Class_13-Drug_design/Class_13-Drug_design.md)
 - Class 14: [Gene Expression]()
 - Class 15: [RNAseq](https://github.com/moverton88/BGGN213/blob/master/Class_15-RNAseq_analysis/Class15-RNAseq.md)
-- Class 16: [Gene Ontology]()
+- Class 16: [Gene Ontology](https://github.com/moverton88/BGGN213/blob/master/Class_16-GO_annotation/Class_16-GO_annotation.md)
 - Class 17: [Network Analysis]()
 - [COVID-19 project](https://github.com/moverton88/BGGN213/blob/master/COVID-19_analysis/MO_corona_stats.md)
 
